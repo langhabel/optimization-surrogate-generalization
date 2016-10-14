@@ -70,7 +70,6 @@ def ensembles(train_X, train_Y, test_X, dims, n=10, training_epochs=3000):
         nn = NN_Regression(data_dim=dims)
         nn.fit(train_X, train_Y, training_epochs=training_epochs)
         predictions += [nn.predict(test_X)]
-        nn.destroy()
 
     uncertainty = np.var(np.array(predictions), axis=0)
     return uncertainty
@@ -81,5 +80,4 @@ def mcdropout(train_X, train_Y, test_X, training_epochs=None, dropout_rate=None,
     nn = NN_Regression()
     nn.fit(train_X, train_Y, training_epochs=training_epochs)
     _, uncertainty= nn.predict_uncertainty(test_X, dropout_rate=dropout_rate, T=T)
-    nn.destroy()
     return uncertainty

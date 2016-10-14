@@ -1,4 +1,4 @@
-"""A neural network implementation for of nonlinear regression in TensorFlow."""
+"""A neural network implementation for nonlinear regression in TensorFlow."""
 import numpy as np
 import tensorflow as tf
 import math
@@ -119,7 +119,7 @@ class NN_Regression:
         batch_size = self.batch_size
         if batch_size == None or batch_size > data_size:
             batch_size = data_size
-        nr_batches = data_size / batch_size
+        nr_batches = data_size // batch_size
         return nr_batches, batch_size
 
     def _get_batch(self, X, Y, step):
@@ -223,7 +223,7 @@ class NN_Regression:
         return X, Y
 
     ###---INTERFACE---###
-    def fit(self, X, Y, training_epochs=3000, verbose=False):
+    def fit(self, X, Y, training_epochs=300, verbose=False):
         """Trains the neural network, given the training data.
 
         Args:
