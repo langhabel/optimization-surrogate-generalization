@@ -223,7 +223,7 @@ class NN_Regression:
         return X, Y
 
     ###---INTERFACE---###
-    def fit(self, X, Y, training_epochs=300, verbose=False):
+    def fit(self, X, Y, training_epochs=3000, verbose=False):
         """Trains the neural network, given the training data.
 
         Args:
