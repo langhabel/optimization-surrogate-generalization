@@ -1,12 +1,21 @@
 """Main program which optimizes n dimensional search spaces. The Generalizer optimizes faster by maintaining a n+1 dimensional surrogate model which incorporates the samples of already solved similar problems with shared features. The additional axis is not vital to solve each optimization problem but connects similar problems from the same class. We thus speak from generalizing between optimization problems.
 
 We call the n dimensional problems (hyper)slices of the n+1 dimensional surrogate space (intuition: 1D slices of a 2D problem space).
+
+The algorithm makes use of three exchangeable modules as defined in the function defs:
+_get_expected_improvement
+    The function responsible for attributing each grid point with the fitness of improving the optima, if elected as next sampling point.
+_get_generalization_surrogate
+    The surrogate model used to envelop the related optimization problems.
+_get_uncertainty
+    Computes the uncertainty inherent in the surrogate model. The technique used should depend on the used surrogate model.
 """
 import numpy as np
-from scipy.stats import norm
 from uncertainty import compute_uncertainty
-from nn_regression import NN_Regression
+from expected_improvement import compute_expected_improvement_forrester
+from surrogate_model import NN_Regression
 import utils
+
 
 class Generalizer:
     """Module to optimize a 1D function with continuous 2D slicing. TODO: extend to arbitrary dimensions.
@@ -18,7 +27,7 @@ class Generalizer:
         samples_X: list of all samples we have, that support the generalization surrogate, in (n+1)-D coordinates
         samples_Y: list of the respective labels
         d: dimension of the data (n+1)
-        grid: the discretized search spearch of the surrogate
+        grid: the discretized search space of the surrogate
         generalization_surrogate
     """
 
@@ -48,13 +57,12 @@ class Generalizer:
             self.samples_X = np.array(initial_samples_X)
             self.samples_Y = np.array(initial_samples_Y)
 
-    def incorporate_new_sample(self, x_new, y_new, slice_):
+    def incorporate_new_sample(self, x_new, y_new):
         """Used to incorporate new samples in the surrogate model during the optimization process.
 
         Args:
             x_new: a new sample location given in scaled n-D coordinates
             y_new: the respective label
-            slice_: the (n+1)-th dimension value
         """
         # add sample to database
         if self.samples_X is None:
@@ -89,18 +97,18 @@ class Generalizer:
             y_min = np.min(y)
         else:
             y_min = 0.0
-        expected_improvement = self._get_expected_improvement(prediction, uncertainty, y_min)
+        e_i = self._get_expected_improvement(prediction, uncertainty, y_min)
         
-        proof = (prediction, uncertainty, expected_improvement)
+        proof = (prediction, uncertainty, e_i)
         
         # get maximum index within n-D slice
-        expected_improvement[~np.isclose(self.grid[:, self.d-1], slice_)] = 0
-        if np.allclose(expected_improvement, 0):
+        e_i[~np.isclose(self.grid[:, self.d-1], slice_)] = 0
+        if np.allclose(e_i, 0):
             prediction_ = np.copy(prediction)
             prediction_[~np.isclose(self.grid[:, self.d-1], slice_)] = float('inf')
             new_sample_index = np.argmin(prediction_)
         else:
-            new_sample_index = np.argmax(expected_improvement) 
+            new_sample_index = np.argmax(e_i)
             
         scaled_coordinates = self.grid[new_sample_index]
         return scaled_coordinates, proof
@@ -123,8 +131,6 @@ class Generalizer:
 
         According to formula (81), Section 4.3.1, Recent advances in surrogate-based optimization, Forrester and Keane.
 
-        Prediction and uncertainty are computed on the generalization surrogate and evaluated on the slice.
-
         Args:
             prediction: the predicted fit to the function based upon the same samples, given in the space of 'grid'
             uncertainty: the respective uncertainty at all gridpoints based upon the samples
@@ -133,32 +139,13 @@ class Generalizer:
         Return:
             expected_improvement: the expected improvement in every grid point
         """
-
-        # switch to nomenclature of paper
-        x = self.grid
-        y_hat = prediction
-        s = uncertainty
-
-        # if s==0 expected improvement is 0
-        binary = np.sign(s)
-
-        # calibrate "s"
-        # TODO: automate (it is hardcoded now to suite the demo example)
-        s = s / 2.0
-
-        # compute expected improvement
-        dif = y_min - y_hat
-        arg = np.divide(dif, s)
-        cdf = norm.cdf(arg)
-        pdf = norm.pdf(arg)
-        E = binary * (dif*cdf + s*pdf)
-
+        E = compute_expected_improvement_forrester(prediction, uncertainty, y_min, self.grid)
         return E
 
     def _get_generalization_surrogate(self):
-        """We use a neural network for nonlinear regression.
+        """The surrogate model used to envelop the related optimization problems.
 
-        Other methods are possible if they provide fit and predict functions.
+        We use a neural network for nonlinear regression.
 
         Return:
             nn: a nonlinear neural network regressor
@@ -167,7 +154,7 @@ class Generalizer:
         return nn
 
     def _get_uncertainty(self):
-        """Computes the uncertainty globally using ensembles.
+        """Computes the uncertainty globally using ensembles of neural networks.
 
         Return:
             uncertainty: variance of the ensemble predictions

@@ -4,7 +4,8 @@ Refer to the report for information about the general concept of uncertainty and
 methods."""
 import numpy as np
 from sklearn.gaussian_process import GaussianProcess
-from nn_regression import NN_Regression
+from surrogate_model import NN_Regression
+
 
 def compute_uncertainty(train_X, train_Y, test_X, dims, method='Ensembles', nr_of_ensembles=10, training_epochs=3000):
     """This is a wrapper function around the different methods of obtaining uncertainty.
@@ -34,6 +35,7 @@ def compute_uncertainty(train_X, train_Y, test_X, dims, method='Ensembles', nr_o
 
     return uncertainty
 
+
 def x_dist(train_X, test_X, dims):
     """Computes uncertainty based on the to the x axis projected distance to the next samples.
 
@@ -46,7 +48,8 @@ def x_dist(train_X, test_X, dims):
             holder[i] = np.min(np.abs(test_X[i]-train_X))**2
     return holder
 
-#TODO test kriging in multi-D
+
+# TODO test kriging in multi-D
 def kriging(train_X, train_Y, test_X):
     """Computes uncertainty based on Kriging."""
     X = np.matrix(train_X).T
@@ -57,6 +60,7 @@ def kriging(train_X, train_Y, test_X):
     gp.fit(X, y)
     _, MSE = gp.predict(TX, eval_MSE=True)
     return np.sqrt(MSE)
+
 
 def ensembles(train_X, train_Y, test_X, dims, n=10, training_epochs=3000):
     """Computes uncertainty based on ensembles of NN with same configuration but different weight initializations.
@@ -74,7 +78,8 @@ def ensembles(train_X, train_Y, test_X, dims, n=10, training_epochs=3000):
     uncertainty = np.var(np.array(predictions), axis=0)
     return uncertainty
 
-#TODO test mcdropout in multi-D
+
+# TODO test mcdropout in multi-D
 def mcdropout(train_X, train_Y, test_X, training_epochs=None, dropout_rate=None, T=None):
     """Computes uncertainty based on Gal and Ghahramani's MC Dropout."""
     nn = NN_Regression()

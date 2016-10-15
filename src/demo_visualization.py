@@ -5,8 +5,8 @@ import math
 import utils
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from mpl_toolkits.mplot3d import axes3d
 from matplotlib import cm
+
 
 def plot(proof, slice_, grid_size, dim_limits, slice_samples_X, slice_samples_Y, past_slices, samples_X, samples_Y):
     """Plots the state after a sample evaluation round.
@@ -23,14 +23,13 @@ def plot(proof, slice_, grid_size, dim_limits, slice_samples_X, slice_samples_Y,
     """
     prediction, uncertainty, expected_improvement = proof[0], proof[1], proof[2]
     
-    fig = plt.figure(figsize=(20,20))
-    gs = gridspec.GridSpec(2,2)
+    fig = plt.figure(figsize=(20, 20))
+    gs = gridspec.GridSpec(2, 2)
     
     d = np.array(dim_limits).shape[1]
     grid = utils.get_grid(grid_size, dim_limits)
     Y = utils.six_hump_camel(grid)
     grid = utils.scale_01(grid, dim_limits)
-
     
     indices = np.isclose(grid[:, d-1], slice_)
     grid_1D = np.linspace(0, 1, grid_size)
@@ -78,7 +77,7 @@ def plot(proof, slice_, grid_size, dim_limits, slice_samples_X, slice_samples_Y,
     ax.plot(grid_1D, true_1D, 'r--', label='Original Curve')
     ax.plot(grid_1D, pred_1D, 'b-', label='Surrogate Model')
     ax.plot(grid_1D, uncert_1D/np.max(uncert_1D), '-', color='orange', label='Uncertainty')
-    ax.plot(slice_samples_X[:,0], slice_samples_Y, 'ko', label='Samples')
+    ax.plot(slice_samples_X[:, 0], slice_samples_Y, 'ko', label='Samples')
     ax.set_xlim(xlim)
     ax.legend(loc='upper left')
 
@@ -87,7 +86,7 @@ def plot(proof, slice_, grid_size, dim_limits, slice_samples_X, slice_samples_Y,
 
 def _ax_plot3D(ax, X, Y, cmap):
     n = int(math.sqrt(X.shape[0]))
-    ax.plot_surface(X[:,0].reshape(n,n), X[:,1].reshape(n,n), Y.reshape(n,n), 
+    ax.plot_surface(X[:, 0].reshape(n, n), X[:, 1].reshape(n, n), Y.reshape(n, n),
                     cmap=cmap, alpha=0.65, rstride=2, cstride=2, linewidth=0.01, antialiased=True)
     ax.set_xlabel('x1', fontsize=15)
     ax.set_ylabel('x2', fontsize=15)
