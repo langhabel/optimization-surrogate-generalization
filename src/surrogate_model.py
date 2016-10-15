@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 import math
 
+
 class NN_Regression:
     """A neural network implementation for nonlinear regression in TensorFlow.
 
@@ -117,7 +118,7 @@ class NN_Regression:
     def _nr_batches(self, data_size):
         """Computes the number of batches according to the given batch size and size of the dataset."""
         batch_size = self.batch_size
-        if batch_size == None or batch_size > data_size:
+        if batch_size is None or batch_size > data_size:
             batch_size = data_size
         nr_batches = data_size // batch_size
         return nr_batches, batch_size
@@ -141,19 +142,18 @@ class NN_Regression:
         """Computes the prediction cost for the given data."""
         nr_batches, batch_size = self._nr_batches(X.shape[0])
 
-        cost_arr = np.zeros((nr_batches))
+        cost_arr = np.zeros(nr_batches)
         for epoch in range(nr_batches):
             X_batch, Y_batch = self._get_batch(X, Y, epoch)
             cost_arr[epoch] = self._compute_batch_cost(X_batch, Y_batch)
         return np.sum(cost_arr) / nr_batches
 
-
     def _compute_batch_cost(self, X_batch, Y_batch):
         """Computes the cost for one batch."""
         cost_arr = self.sess.run(self.l2loss, feed_dict={self.X_pl: X_batch,
-                                                        self.Y_pl: Y_batch,
-                                                        self.keep_prob_pl: 1.0,
-                                                        self.data_len_pl: X_batch.shape[0]})
+                                                         self.Y_pl: Y_batch,
+                                                         self.keep_prob_pl: 1.0,
+                                                         self.data_len_pl: X_batch.shape[0]})
         return cost_arr  # one float per batch
 
     def _run_training(self, X, Y, training_epochs, verbose):
@@ -166,11 +166,10 @@ class NN_Regression:
             X_batch = X_batch[indices]
             Y_batch = Y_batch[indices]
 
-
             _ = self.sess.run(self.optimizer, feed_dict={self.X_pl: X_batch,
-                                                        self.Y_pl: Y_batch,
-                                                        self.keep_prob_pl: self.dropout_rate_train,
-                                                        self.data_len_pl: X_batch.shape[0]})
+                                                         self.Y_pl: Y_batch,
+                                                         self.keep_prob_pl: self.dropout_rate_train,
+                                                         self.data_len_pl: X_batch.shape[0]})
 
             # display training error
             if epoch % self.display_step == 0 and verbose:
@@ -207,12 +206,11 @@ class NN_Regression:
         estimates = np.zeros((T, X.shape[0]))
         for i in range(T):
             # don't use batches but full test set
-            est_list = self.sess.run([self.output], feed_dict={ self.X_pl: X,
-                                                                self.keep_prob_pl: dropout_rate,
-                                                                self.data_len_pl: X.shape[0]})
+            est_list = self.sess.run([self.output], feed_dict={self.X_pl: X,
+                                                               self.keep_prob_pl: dropout_rate,
+                                                               self.data_len_pl: X.shape[0]})
             estimates[i, :] = np.array(est_list).flatten()
         return estimates
-
 
     def _preprocess_data(self, X, Y):
         """Aligns matrix/array shapes for the case of 1D."""
@@ -229,6 +227,7 @@ class NN_Regression:
         Args:
             X: training data in shape (n_samples, dim)
             Y: training labels
+            training_epochs: number of training epochs
             verbose: whether to print training error every once in a while
 
         Returns:
