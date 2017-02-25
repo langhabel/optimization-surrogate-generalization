@@ -1,6 +1,6 @@
 # Optimization Surrogate Generalization
 
-Coming in January 2017.
+Coming in April 2017.
 
 ## License
 
