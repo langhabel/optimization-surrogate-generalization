@@ -2,7 +2,7 @@
 
 ## Abstract
 
-Optimization constitutes a highly relevant but complex task in many industries. Special focus lies on e ciency, as obtaining samples from the objective functions is typically particularly expensive. We address this problem by using neural networks as surrogate models and estimates of uncertainty in the surrogates to orchestrate the optimization process. We evaluate multiple methods for uncertainty estimation and apply them to balance between exploration and exploitation. The approach is economical regarding the number of required samples. We further propose a method to build a meta-model over a class of similar optimization problems, which we show more than halves the number of samples required in new problems by generalizing from old ones.
+Optimization constitutes a highly relevant but complex task in many industries. Special focus lies on efficiency, as obtaining samples from the objective functions is typically particularly expensive. We address this problem by using neural networks as surrogate models and estimates of uncertainty in the surrogates to orchestrate the optimization process. We evaluate multiple methods for uncertainty estimation and apply them to balance between exploration and exploitation. The approach is economical regarding the number of required samples. We further propose a method to build a meta-model over a class of similar optimization problems, which we show more than halves the number of samples required in new problems by generalizing from old ones.
 
 ## Modules
 
