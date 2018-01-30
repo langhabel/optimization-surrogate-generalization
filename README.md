@@ -9,9 +9,9 @@ When faced with a new task, humans usually do not start from scratch but try to 
    1.2 [A Scientific Explanation](#scientific-explanation)<br/>
 2. [User Interface](#user-Interface)  <br/>
 3. [Modules](#modules)  <br/>
-   5.1 [Uncertainty Measurement](#uncertainty-measurement)<br/>
-   5.2 [Balancing Exploration and Exploitation](#balancing-exploration-and-exploitation)<br/>
-   5.3 [Function Approximation Using Deep Learning](#function-approximation-using-deep-learning)<br/>
+   3.1 [Uncertainty Measurement](#uncertainty-measurement)<br/>
+   3.2 [Balancing Exploration and Exploitation](#balancing-exploration-and-exploitation)<br/>
+   3.3 [Function Approximation Using Deep Learning](#function-approximation-using-deep-learning)<br/>
 4. [NIPS](#nips)  <br/>
 
 <a name="introduction"/><br/>
