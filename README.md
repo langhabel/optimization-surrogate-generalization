@@ -1,6 +1,6 @@
-# Optimization Surrogate Generalization
+# Learning to Optimize
 
-When faced with a new task, humans usually do not start from scratch but try to incorporate knowledge of previously solved problems. We implement the same procedure for optimization problems using deep learning: Our neural network learns and generalizes over similar problems!
+When faced with a new task, humans usually do not start from scratch but incorporate knowledge obtained from previously solved problems. We implement the same procedure for optimization problems using deep learning: Our neural network learns and generalizes over similar problems!
 
 ## Table of Contents
 
@@ -41,16 +41,16 @@ You can find a notebook-demo for the generalization module [here](https://github
 
 **Instantiation**:
 - `Generalizer(dim, initial_samples_X, initial_samples_Y, grid_size)`
-   - `dim`: Space of data (array with shape *(min/max, features)*)
-   - `initial_samples_X`, `initial_samples_Y`: Samples (array with shape *(data points, features)*; scaled to [0,1]-range (e.g. using `utils.scale_01(x, original_range)`))
+   - `dim`: Space of data, array with shape (2,dimensions), rows refer to min/max
+   - `initial_samples_X`, `initial_samples_Y`: Samples, array with shape (data points,dimensions), prior scaling of domain necessary (e.g. using `utils.scale_01(x, original_range)`)
    - `grid_size`: Amount of evaluated points along each dimension (integer) [<sup>[2](#myfootnote2)</sup>]
 
-**Generalizer proposes new sampling location** (user can now acquire this sample):
+**Proposition of new sampling location**:
 - `generalizer.get_next_sampling_location(slice)`
-   - `slice`: *One* optimization problem, e.g. *airplane propeller optimization* within *propeller optimization surrogate*. The entire model consists of many (n-1)-dimensional *slices*, e.g. functions for propellers of hovercrafts, ships and planes.
-   - Using `utils.scale_restore(data)`, output can be transformed back to original space (no [0,1]-scaling)
-
-**Incorporating new sample into generalizer**.
+   - `slice`: *One* optimization problem, e.g. *airplane propeller optimization* within *propeller optimization*. The entire model consists of many (n-1)-dimensional *slices*, e.g. functions for propellers of hovercrafts, ships and planes.
+   - `utils.scale_restore(data)` transforms data back to original space (reverses prior scaling)
+   
+**Incorporation of new sample**:
 - `generalizer.incorporate_new_sample(x_new, y_new)`
    - `x_new`, `y_new`: *x* refers to features (e.g. propeller-width), *y* to respective labels (e.g. performance)
 
@@ -73,7 +73,7 @@ This module measures prediction-uncertainty:
 <a name="balancing-exploration-and-exploitation"/><br/>
 ### 3.2 Balancing Exploration and Exploitation
 
-This module calculates *expected improvement* for each future sampling location. The method works by balancing exploration and exploitation based on uncertainty estimates [<sup>[4](#myfootnote4)</sup>]. This assures efficient sampling.
+This module calculates *expected improvement* for each future sampling location. The method balances exploration and exploitation based on uncertainty estimates [<sup>[4](#myfootnote4)</sup>]. This assures efficient sampling.
 
 - `expected_improvement.compute_expected_improvement_forrester(prediction, uncertainty, y_min, grid)`
    - `prediction`: Predicted function for slice (array with values for each grid-point)
@@ -84,7 +84,7 @@ This module calculates *expected improvement* for each future sampling location.
 <a name="function-approximation-using-deep-learning"/><br/>
 ### 3.3 Function Approximation Using Deep Learning 
 
-Given sample points, this module approximates continuous functions with arbitrary dimensionality. [<sup>[5](#myfootnote5)</sup>] Those are internally used.
+Given sample points, this module approximates continuous functions with arbitrary dimensionality. [<sup>[5](#myfootnote5)</sup>]
 
 <a name="nips"/><br/>
 ## 4 NIPS
@@ -94,7 +94,7 @@ An [extended abstract](http://bayesiandeeplearning.org/2016/papers/BDL_9.pdf) ha
 
 - [<a name="myfootnote1">1</a>]: [Graphical illustration](https://image.ibb.co/gp8XPR/Selection_006.png): Efficiency is measured by the required amount of samples for reaching the global minimum. We used the [*six hump camel function*](https://www.sfu.ca/~ssurjano/camel6.html) to test our implementation.
 
-- [<a name="myfootnote2">2</a>] Scaling to higher dimensionality exponentially increases the search space. We advise using a sparse grid in those cases. Future research might focus on increasing scalability.
+- [<a name="myfootnote2">2</a>] Scaling to higher dimensionality exponentially increases the search space. We advise using a sparse grid in those cases.
 
 - [<a name="myfootnote3">3</a>]: [Performance overview for uncertainty-measurement methods](https://image.ibb.co/hgNZ4R/Selection_005.png)
    - [`Kriging`](https://en.wikipedia.org/wiki/Kriging): *Gaussian process regression*, interpolated values are modeled by a Gaussian process using variance as uncertainty estimates.<br/>
@@ -103,7 +103,7 @@ An [extended abstract](http://bayesiandeeplearning.org/2016/papers/BDL_9.pdf) ha
    *Advantage*: Easy; *disadvantages*: too peaky, uneven results, independent of neural network
    - [`Ensembles`](http://ieeexplore.ieee.org/abstract/document/1216214/): Using several neural networks with different random weight initializations. Mean over outputs constitutes prediction, variance depicts uncertainty.<br/>
    *Advantage*: Uncertainty estimates depend on neural network; *disadvantage*: computationally expensive<br/>
-   *Outlook*: Ensemble-uncertainty-estimates could be used as training data for a new neural network, which could then exclusively be used on new data. This would increase computational efficiency.
+   *Future work*: Ensemble-uncertainty-estimates could be used as training data for a new neural network, which could then exclusively be used on new data. This would increase computational efficiency.
    - [`MCDropout`](http://www.cs.ox.ac.uk/people/yarin.gal/website/blog_3d801aa532c1ce.html): *Monte-Carlo dropout*: Approximation of deep Gaussian process by application of dropout (multiple times) in test instead of training. Mean of output constitutes prediction, variance depicts uncertainty.<br/>
    *Advantage*: Uncertainty estimate depends on neural network<br/>
    *Disadvantage*: Tendency that higher curvature (in the function) is modelled by scarce number of neurons. Thus, dropout disproportionally affects those regions. However, high curvature can be present in already explored regions, leading to poor uncertainty estimates in our scenario.
