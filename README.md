@@ -4,20 +4,29 @@ When faced with a new task, humans usually do not start from scratch but incorpo
 
 ## Table of Contents
 
+0. [Installation](#installation) <br/>
 1. [Introduction](#introduction) <br/>
    1.1 [An Intuitive Explanation](#intuitive-explanation) <br/>
    1.2 [A Scientific Explanation](#scientific-explanation)<br/>
-2. [User Interface](#user-Interface)  <br/>
+2. [Usage](#usage)  <br/>
 3. [Modules](#modules)  <br/>
    3.1 [Uncertainty Measurement](#uncertainty-measurement)<br/>
    3.2 [Balancing Exploration and Exploitation](#balancing-exploration-and-exploitation)<br/>
    3.3 [Function Approximation Using Deep Learning](#function-approximation-using-deep-learning)<br/>
 4. [NIPS](#nips)  <br/>
 
+<a name="installation"/><br/>
+## 0 Installation
+
+Before doing anything else, please install the Python dependencies (preferably in a virtual environment) using:
+```
+pip install -r requirements.txt
+```
+
 <a name="introduction"/><br/>
 ## 1 Introduction
 
-<a name="intuitive-explanation"/> <br/>
+<a name="intuitive-explanation"/><br/>
 ### 1.1 An Intuitive Explanation
 
 - **Problem**: We focus on optimization problems of arbitrary dimensionality that can be represented with functions.<br/>
@@ -34,25 +43,42 @@ When faced with a new task, humans usually do not start from scratch but incorpo
 ### 1.2 A Scientific Explanation
 Optimization constitutes a highly relevant but complex task in many industries. Special focus lies on efficiency, as obtaining samples from the objective functions is typically particularly expensive. We address this problem by using neural networks as surrogate models and estimates of uncertainty in the surrogates to orchestrate the optimization process. We evaluate multiple methods for uncertainty estimation and apply them to balance between exploration and exploitation. The approach is economical regarding the number of required samples. We further propose a method to build a meta-model over a class of similar optimization problems, which we show more than halves the number of samples required in new problems by generalizing from old ones.
 
-<a name="user-Interface"/><br/>
-## 2 User Interface
+<a name="usage"/><br/>
+## 2 Usage
 
-You can find a notebook-demo for the generalization module [here](https://github.com/langhabel/optimization-surrogate-generalization/blob/master/src/demo.ipynb). The following commands are all you need. It is that easy.
+You can find a notebook-demo for the generalization module [here](https://github.com/langhabel/optimization-surrogate-generalization/blob/master/src/demo.ipynb).
+To run it install your currently activated virtual environment as kernel, and then run jupyter notebook:
+
+```
+python -m ipykernel install --user --name=optimization-surrogate-generalization
+jupyter notebook
+```
 
 **Instantiation**:
-- `Generalizer(dim, initial_samples_X, initial_samples_Y, grid_size)`
-   - `dim`: Space of data, array with shape (2,dimensions), rows refer to min/max
-   - `initial_samples_X`, `initial_samples_Y`: Samples, array with shape (data points,dimensions), prior scaling of domain necessary (e.g. using `utils.scale_01(x, original_range)`)
-   - `grid_size`: Amount of evaluated points along each dimension (integer) [<sup>[2](#myfootnote2)</sup>]
+
+```
+from generalizer import Generalizer
+
+Generalizer(dim, initial_samples_X, initial_samples_Y, grid_size)
+```
+- `dim`: Space of data, array with shape (2,dimensions), rows refer to min/max
+- `initial_samples_X`, `initial_samples_Y`: Samples, array with shape (data points,dimensions), prior scaling of domain necessary (e.g. using `utils.scale_01(x, original_range)`)
+- `grid_size`: Amount of evaluated points along each dimension (integer) [<sup>[2](#myfootnote2)</sup>]
 
 **Proposition of new sampling location**:
-- `generalizer.get_next_sampling_location(slice)`
-   - `slice`: *One* optimization problem, e.g. *airplane propeller optimization* within *propeller optimization*. The entire model consists of many (n-1)-dimensional *slices*, e.g. functions for propellers of hovercrafts, ships and planes.
-   - `utils.scale_restore(data)` transforms data back to original space (reverses prior scaling)
+
+```
+generalizer.get_next_sampling_location(slice)
+```
+- `slice`: *One* optimization problem, e.g. *airplane propeller optimization* within *propeller optimization*. The entire model consists of many (n-1)-dimensional *slices*, e.g. functions for propellers of hovercrafts, ships and planes.
+- `utils.scale_restore(data)` transforms data back to original space (reverses prior scaling)
    
 **Incorporation of new sample**:
-- `generalizer.incorporate_new_sample(x_new, y_new)`
-   - `x_new`, `y_new`: *x* refers to features (e.g. propeller-width), *y* to respective labels (e.g. performance)
+
+```
+generalizer.incorporate_new_sample(x_new, y_new)
+```
+- `x_new`, `y_new`: *x* refers to features (e.g. propeller-width), *y* to respective labels (e.g. performance)
 
 Exemplary convergence criteria can be found in the demo-notebook.
 
@@ -64,22 +90,30 @@ Exemplary convergence criteria can be found in the demo-notebook.
 
 This module measures prediction-uncertainty:
 
-- `uncertainty.compute_uncertainty(train_X, train_Y, test_X, dims, method='Ensembles')`
-   - `train_X`, `train_Y`: Training data and labels
-   - `test_X`: test-grid (Where should uncertainty be computed?)
-   - `dims`: Dimensionality
-   - `method`: Method for obtaining uncertainty, either `Kriging`, `XDist`, `Ensembles` or `MCDropout` [<sup>[3](#myfootnote3)</sup>]
+```
+import uncertainty
+
+uncertainty.compute_uncertainty(train_X, train_Y, test_X, dims, method='Ensembles')
+```
+- `train_X`, `train_Y`: Training data and labels
+- `test_X`: test-grid (Where should uncertainty be computed?)
+- `dims`: Dimensionality
+- `method`: Method for obtaining uncertainty, either `Kriging`, `XDist`, `Ensembles` or `MCDropout` [<sup>[3](#myfootnote3)</sup>]
 
 <a name="balancing-exploration-and-exploitation"/><br/>
 ### 3.2 Balancing Exploration and Exploitation
 
 This module calculates *expected improvement* for each future sampling location. The method balances exploration and exploitation based on uncertainty estimates [<sup>[4](#myfootnote4)</sup>]. This assures efficient sampling.
 
-- `expected_improvement.compute_expected_improvement_forrester(prediction, uncertainty, y_min, grid)`
-   - `prediction`: Predicted function for slice (array with values for each grid-point)
-   - `grid`: Represents space (array with points to evaluate)
-   - `uncertainty`: Function displaying prediction-uncertainty (array with values for each grid-point)
-   - `y_min`: Minimum value of all samples in slice
+```
+import expected_improvement
+
+expected_improvement.compute_expected_improvement_forrester(prediction, uncertainty, y_min, grid)
+```
+- `prediction`: Predicted function for slice (array with values for each grid-point)
+- `grid`: Represents space (array with points to evaluate)
+- `uncertainty`: Function displaying prediction-uncertainty (array with values for each grid-point)
+- `y_min`: Minimum value of all samples in slice
 
 <a name="function-approximation-using-deep-learning"/><br/>
 ### 3.3 Function Approximation Using Deep Learning 

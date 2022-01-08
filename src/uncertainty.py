@@ -3,7 +3,7 @@
 Refer to the report for information about the general concept of uncertainty and a comparison of the respective
 methods."""
 import numpy as np
-from sklearn.gaussian_process import GaussianProcess
+from sklearn.gaussian_process import GaussianProcessRegressor
 from surrogate_model import NN_Regression
 
 
@@ -56,7 +56,7 @@ def kriging(train_X, train_Y, test_X):
     y = np.matrix(train_Y).T
     TX = np.matrix(test_X).T
 
-    gp = GaussianProcess(corr='cubic', theta0=1e-2, thetaL=1e-4, thetaU=1e-1, random_start=100)
+    gp = GaussianProcessRegressor(corr='cubic', theta0=1e-2, thetaL=1e-4, thetaU=1e-1, random_start=100)
     gp.fit(X, y)
     _, MSE = gp.predict(TX, eval_MSE=True)
     return np.sqrt(MSE)

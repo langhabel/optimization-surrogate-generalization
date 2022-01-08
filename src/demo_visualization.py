@@ -6,7 +6,6 @@ import utils
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
 
 
 def plot(proof, slice_, grid_size, dim_limits, slice_samples_X, slice_samples_Y, past_slices, samples_X, samples_Y):
